@@ -621,41 +621,6 @@
 		};
 	};
 
-	quiet-therm-step {
-		polling-delay-passive = <2000>;
-		polling-delay = <0>;
-		thermal-governor = "step_wise";
-		thermal-sensors = <&pm660_adc_tm ADC_AMUX_THM5_PU2>;
-		wake-capable-sensor;
-		trips {
-			gold_trip: gold-trip {
-				temperature = <50000>;
-				hysteresis = <0>;
-				type = "passive";
-			};
-
-			silver_trip: silver-trip {
-				temperature = <53000>;
-				hysteresis = <0>;
-				type = "passive";
-			};
-		};
-
-		cooling-maps {
-				/* throttle from fmax to 1536000KHz */
-			skin_cpu0 {
-				trip = <&silver_trip>;
-				cooling-device = <&CPU0 THERMAL_NO_LIMIT 3>;
-			};
-
-			skin_cpu4 {
-				trip = <&gold_trip>;
-					/* throttle from fmax to 1747200KHz */
-				cooling-device = <&CPU4 THERMAL_NO_LIMIT 5>;
-			};
-		};
-	};
-
 	cpuss-0-step {
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
