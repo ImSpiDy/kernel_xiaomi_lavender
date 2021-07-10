@@ -5255,7 +5255,9 @@ static int q6afe_send_enc_config(u16 port_id,
 	struct asm_aptx_ad_speech_mode_cfg_t speech_codec_init_param;
 	struct param_hdr_v3 param_hdr;
 	int ret;
+#ifndef CONFIG_ARCH_SDM660
 	uint32_t frame_size_ctl_value_v2;
+#endif
 
 	pr_debug("%s:update DSP for enc format = %d\n", __func__, format);
 
