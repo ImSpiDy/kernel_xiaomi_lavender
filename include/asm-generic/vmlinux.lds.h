@@ -497,7 +497,6 @@
 		*(.text.hot TEXT_MAIN .text.fixup .text.unlikely)	\
 		*(TEXT_CFI_MAIN) 					\
 		*(.text..refcount)					\
-		*(.text..ftrace)					\
 		*(.ref.text)						\
 	MEM_KEEP(init.text*)						\
 	MEM_KEEP(exit.text*)						\
