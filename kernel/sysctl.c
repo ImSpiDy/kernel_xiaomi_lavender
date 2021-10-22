@@ -346,7 +346,7 @@ static struct ctl_table kern_table[] = {
 		.procname	= "sched_child_runs_first",
 		.data		= &sysctl_sched_child_runs_first,
 		.maxlen		= sizeof(unsigned int),
-		.mode		= 0644,
+		.mode		= 0444,
 		.proc_handler	= proc_dointvec,
 	},
 #if defined(CONFIG_PREEMPT_TRACER) && defined(CONFIG_PREEMPTIRQ_EVENTS)
@@ -638,7 +638,7 @@ static struct ctl_table kern_table[] = {
 		.procname	= "sched_wakeup_granularity_ns",
 		.data		= &sysctl_sched_wakeup_granularity,
 		.maxlen		= sizeof(unsigned int),
-		.mode		= 0644,
+		.mode		= 0444,
 		.proc_handler	= sched_proc_update_handler,
 		.extra1		= &min_wakeup_granularity_ns,
 		.extra2		= &max_wakeup_granularity_ns,
