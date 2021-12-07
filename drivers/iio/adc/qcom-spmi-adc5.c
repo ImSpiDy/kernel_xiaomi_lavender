@@ -1264,7 +1264,9 @@ static int adc_probe(struct platform_device *pdev)
 	int ret, irq_eoc;
 	u32 reg;
 	bool skip_usb_wa = false;
+#ifdef CONFIG_IPC_LOGGING
 	char adc_name[40];
+#endif
 
 	regmap = dev_get_regmap(dev->parent, NULL);
 	if (!regmap)
