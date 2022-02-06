@@ -51,6 +51,12 @@ menuconfig MSMB_CAMERA_LEGACY
        and postprocessing drivers.
        Legacy msm-4.4 version
 
+config MSMB_CAMERA_OSS
+     bool "QTI MSM camera and video capture 2.0 (oss version)"
+     depends on MSMB_CAMERA
+     help
+       Say Y here to use OSS Qualcomm msm camera and video capture 2.0.
+
 config MSMB_CAMERA_DEBUG
      bool "QTI MSM camera 2.0 debugging with printk"
      depends on MSMB_CAMERA
@@ -65,8 +71,11 @@ if MSMB_CAMERA
        if MSMB_CAMERA_LEGACY
               source "drivers/media/platform/msm/camera_v2/Kconfig"
        endif
-       if !MSMB_CAMERA_LEGACY
+       if !MSMB_CAMERA_LEGACY || !MSM_CAMERA_OSS
               source "drivers/media/platform/msm/camera_v2/Kconfig"
+       endif
+       if MSM_CAMERA_OSS
+	      source "drivers/media/platform/msm/camera_v2-oss/Kconfig"
        endif
 endif # MSMB_CAMERA
 
