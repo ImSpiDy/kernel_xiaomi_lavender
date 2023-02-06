@@ -39,8 +39,8 @@ TANGGAL=$(date +"%F%S")
 FINAL_ZIP=${ZIPNAME}-${VERSION}-${DEVICE}-${TANGGAL}.zip
 
 ##----------------------------------------------------------##
-# Specify compiler - nexus, proton, azure, evagcc, aosp
-COMPILER=nexus
+# Specify compiler - nexus, proton, azure, aosp
+COMPILER=aosp
 
 ##----------------------------------------------------------##
 # Clone ToolChain
@@ -60,12 +60,6 @@ function cloneTC() {
 	post_msg " Cloning Azure Clang ToolChain "
 	git clone --depth=1 https://gitlab.com/Panchajanya1999/azure-clang.git clang
 	PATH="${KERNEL_DIR}/clang/bin:$PATH"
-	elif [ $COMPILER = "eva" ];
-	then
-	post_msg " Cloning Eva GCC ToolChain "
-	git clone --depth=1 https://github.com/mvaisakh/gcc-arm64.git -b gcc-new gcc64
-	git clone --depth=1 https://github.com/mvaisakh/gcc-arm.git -b gcc-new gcc32
-	PATH=$KERNEL_DIR/gcc64/bin/:$KERNEL_DIR/gcc32/bin/:/usr/bin:$PATH
 	elif [ $COMPILER = "aosp" ];
 	then
 	post_msg " Cloning Aosp Clang ToolChain "
@@ -79,7 +73,7 @@ function cloneTC() {
 	PATH="${KERNEL_DIR}/aosp-clang/bin:${KERNEL_DIR}/gcc/bin:${KERNEL_DIR}/gcc32/bin:${PATH}"
 	fi
         # Clone AnyKernel
-        git clone --depth=1 https://github.com/reaPeR1010/AnyKernel3
+        git clone --depth=1 https://github.com/ImSpiDy/AnyKernel3
 
 	}
 
@@ -91,9 +85,6 @@ function exports() {
         if [ -d ${KERNEL_DIR}/clang ];
            then
                export KBUILD_COMPILER_STRING=$(${KERNEL_DIR}/clang/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
-        elif [ -d ${KERNEL_DIR}/gcc64 ];
-           then
-               export KBUILD_COMPILER_STRING=$("$KERNEL_DIR/gcc64"/bin/aarch64-elf-gcc --version | head -n 1)
         elif [ -d ${KERNEL_DIR}/aosp-clang ];
             then
                export KBUILD_COMPILER_STRING=$(${KERNEL_DIR}/aosp-clang/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
@@ -158,19 +149,6 @@ START=$(date +"%s")
 		   CC=clang \
 	       CROSS_COMPILE=aarch64-linux-gnu- \
 	       CROSS_COMPILE_COMPAT=arm-linux-gnueabi- \
-	       V=$VERBOSE 2>&1 | tee error.log
-	elif [ -d ${KERNEL_DIR}/gcc64 ];
-	   then
-	       make -kj$(nproc --all) O=out \
-	       ARCH=arm64 \
-	       CROSS_COMPILE_COMPAT=arm-eabi- \
-	       CROSS_COMPILE=aarch64-elf- \
-	       AR=llvm-ar \
-	       NM=llvm-nm \
-	       OBJCOPY=llvm-objcopy \
-	       OBJDUMP=llvm-objdump \
-	       STRIP=llvm-strip \
-	       OBJSIZE=llvm-size \
 	       V=$VERBOSE 2>&1 | tee error.log
         elif [ -d ${KERNEL_DIR}/aosp-clang ];
            then
