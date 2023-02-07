@@ -1652,7 +1652,7 @@ static struct ctl_table vm_table[] = {
 		.procname       = "reap_mem_on_sigkill",
 		.data           = &sysctl_reap_mem_on_sigkill,
 		.maxlen         = sizeof(sysctl_reap_mem_on_sigkill),
-		.mode           = 0644,
+		.mode           = 0444,
 		.proc_handler   = proc_dointvec,
 	},
 	{
