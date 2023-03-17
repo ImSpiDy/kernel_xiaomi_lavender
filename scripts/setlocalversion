@@ -126,12 +126,6 @@ scm_version()
 			fi
 		fi
 
-		# Are there uncommitted changes?
-		# These are represented by + after the changeset id.
-		case "$hgid" in
-			*+|*+\ *) printf '%s' -dirty ;;
-		esac
-
 		# All done with mercurial
 		return
 	fi
