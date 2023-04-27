@@ -81,7 +81,6 @@
 
 #include "binder_alloc.h"
 #include "binder_internal.h"
-#include "binder_trace.h"
 
 static HLIST_HEAD(binder_deferred_list);
 static DEFINE_MUTEX(binder_deferred_lock);
@@ -1221,10 +1220,6 @@ static void binder_do_set_priority(struct task_struct *task,
 			     "%d: priority %d not allowed, using %d instead\n",
 			      task->pid, desired.prio,
 			      to_kernel_prio(policy, priority));
-
-	trace_binder_set_priority(task->tgid, task->pid, task->normal_prio,
-				  to_kernel_prio(policy, priority),
-				  desired.prio);
 
 	/* Set the actual priority */
 	if (task->policy != policy || is_rt_policy(policy)) {
@@ -2611,7 +2606,6 @@ static int binder_translate_binder(struct flat_binder_object *fp,
 	fp->handle = rdata.desc;
 	fp->cookie = 0;
 
-	trace_binder_transaction_node_to_ref(t, node, &rdata);
 	binder_debug(BINDER_DEBUG_TRANSACTION,
 		     "        node %d u%016llx -> ref %d desc %d\n",
 		     node->debug_id, (u64)node->ptr,
@@ -2658,7 +2652,6 @@ static int binder_translate_handle(struct flat_binder_object *fp,
 					 0, NULL);
 		if (node->proc)
 			binder_inner_proc_unlock(node->proc);
-		trace_binder_transaction_ref_to_node(t, node, &src_rdata);
 		binder_debug(BINDER_DEBUG_TRANSACTION,
 			     "        ref %d desc %d -> node %d u%016llx\n",
 			     src_rdata.debug_id, src_rdata.desc, node->debug_id,
@@ -2677,8 +2670,6 @@ static int binder_translate_handle(struct flat_binder_object *fp,
 		fp->binder = 0;
 		fp->handle = dest_rdata.desc;
 		fp->cookie = 0;
-		trace_binder_transaction_ref_to_ref(t, node, &src_rdata,
-						    &dest_rdata);
 		binder_debug(BINDER_DEBUG_TRANSACTION,
 			     "        ref %d desc %d -> ref %d desc %d (node %d)\n",
 			     src_rdata.debug_id, src_rdata.desc,
@@ -2734,7 +2725,6 @@ static int binder_translate_fd(int fd,
 		goto err_get_unused_fd;
 	}
 	task_fd_install(target_proc, target_fd, file);
-	trace_binder_transaction_fd(t, fd, target_fd);
 	binder_debug(BINDER_DEBUG_TRANSACTION, "        fd %d -> %d\n",
 		     fd, target_fd);
 
@@ -3289,8 +3279,6 @@ static void binder_transaction(struct binder_proc *proc,
 		}
 	}
 
-	trace_binder_transaction(reply, t, target_node);
-
 	t->buffer = binder_alloc_new_buf(&target_proc->alloc, tr->data_size,
 		tr->offsets_size, extra_buffers_size,
 		!reply && (t->flags & TF_ONE_WAY), current->tgid);
@@ -3321,7 +3309,6 @@ static void binder_transaction(struct binder_proc *proc,
 	t->buffer->debug_id = t->debug_id;
 	t->buffer->transaction = t;
 	t->buffer->target_node = target_node;
-	trace_binder_transaction_alloc_buf(t->buffer);
 
 	if (binder_alloc_copy_user_to_buffer(
 				&target_proc->alloc,
@@ -3630,7 +3617,6 @@ err_bad_object_type:
 err_bad_offset:
 err_bad_parent:
 err_copy_data_failed:
-	trace_binder_transaction_failed_buffer_release(t->buffer);
 	binder_transaction_buffer_release(target_proc, t->buffer,
 					  buffer_offset, true);
 	if (target_node)
@@ -3717,7 +3703,6 @@ static int binder_thread_write(struct binder_proc *proc,
 		if (get_user(cmd, (uint32_t __user *)ptr))
 			return -EFAULT;
 		ptr += sizeof(uint32_t);
-		trace_binder_command(cmd);
 #ifdef CONFIG_ANDROID_BINDER_LOGS
 		if (_IOC_NR(cmd) < ARRAY_SIZE(binder_stats.bc)) {
 			atomic_inc(&binder_stats.bc[_IOC_NR(cmd)]);
@@ -3918,7 +3903,6 @@ static int binder_thread_write(struct binder_proc *proc,
 				}
 				binder_node_inner_unlock(buf_node);
 			}
-			trace_binder_transaction_buffer_release(buffer);
 			binder_transaction_buffer_release(proc, buffer, 0, false);
 			binder_alloc_free_buf(&proc->alloc, buffer);
 			break;
@@ -4172,7 +4156,6 @@ static int binder_thread_write(struct binder_proc *proc,
 static void binder_stat_br(struct binder_proc *proc,
 			   struct binder_thread *thread, uint32_t cmd)
 {
-	trace_binder_return(cmd);
 #ifdef CONFIG_ANDROID_BINDER_LOGS
 	if (_IOC_NR(cmd) < ARRAY_SIZE(binder_stats.br)) {
 		atomic_inc(&binder_stats.br[_IOC_NR(cmd)]);
@@ -4270,9 +4253,6 @@ retry:
 
 	thread->looper |= BINDER_LOOPER_STATE_WAITING;
 
-	trace_binder_wait_for_work(wait_for_proc_work,
-				   !!thread->transaction_stack,
-				   !binder_worklist_empty(proc, &thread->todo));
 	if (wait_for_proc_work) {
 		if (!(thread->looper & (BINDER_LOOPER_STATE_REGISTERED |
 					BINDER_LOOPER_STATE_ENTERED))) {
@@ -4560,7 +4540,6 @@ retry:
 		}
 		ptr += trsize;
 
-		trace_binder_transaction_received(t);
 #ifdef CONFIG_SCHED_WALT
 		if (current->low_latency)
 			current->low_latency = false;
@@ -4900,7 +4879,6 @@ static int binder_ioctl_write_read(struct file *filp,
 					  bwr.write_buffer,
 					  bwr.write_size,
 					  &bwr.write_consumed);
-		trace_binder_write_done(ret);
 		if (ret < 0) {
 			bwr.read_consumed = 0;
 			if (copy_to_user(ubuf, &bwr, sizeof(bwr)))
@@ -4913,7 +4891,6 @@ static int binder_ioctl_write_read(struct file *filp,
 					 bwr.read_size,
 					 &bwr.read_consumed,
 					 filp->f_flags & O_NONBLOCK);
-		trace_binder_read_done(ret);
 		binder_inner_proc_lock(proc);
 		if (!binder_worklist_empty_ilocked(&proc->todo))
 			binder_wakeup_proc_ilocked(proc);
@@ -5059,8 +5036,6 @@ static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 
 	binder_selftest_alloc(&proc->alloc);
 
-	trace_binder_ioctl(cmd, arg);
-
 	ret = wait_event_interruptible(binder_user_error_wait, binder_stop_on_user_error < 2);
 	if (ret)
 		goto err_unlocked;
@@ -5176,7 +5151,6 @@ err:
 	if (ret && ret != -EINTR)
 		pr_info("%d:%d ioctl %x %lx returned %d\n", proc->pid, current->pid, cmd, arg, ret);
 err_unlocked:
-	trace_binder_ioctl_done(ret);
 	return ret;
 }
 
@@ -6279,6 +6253,5 @@ err_alloc_device_names_failed:
 device_initcall(binder_init);
 
 #define CREATE_TRACE_POINTS
-#include "binder_trace.h"
 
 MODULE_LICENSE("GPL v2");
