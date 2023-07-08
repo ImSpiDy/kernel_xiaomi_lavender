@@ -20,9 +20,9 @@ MODEL=Xiaomi
 DEVICE=Lavender
 
 # Kernel Name and Version
-ZIPNAME=S0NiX
-VERSION=v2.0-CLO
-CLO_TAG=LA.UM.11.2.1.r1-04100
+ZIPNAME=S0NiX-CLO
+VERSION=v3.0
+CLO_TAG=LA.UM.11.2.1.r1-04200
 
 # Kernel Defconfig
 DEFCONFIG=lavender_defconfig
