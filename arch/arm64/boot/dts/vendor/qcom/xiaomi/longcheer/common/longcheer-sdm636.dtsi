@@ -13,7 +13,6 @@
 /* sdm660.dtsi tulip/whyred specific diff */
 &firmware {
 	android {
-		/delete-node/ fstab;
 	};
 };
 
