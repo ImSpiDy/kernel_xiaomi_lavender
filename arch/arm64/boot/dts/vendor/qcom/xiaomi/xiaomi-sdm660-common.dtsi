@@ -1,6 +1,0 @@
-&firmware {
-	android {
-		boot_devices = "soc/c0c4000.sdhci";
-	};
-};
-
