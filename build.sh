@@ -27,6 +27,21 @@ CLO_TAG=LA.UM.11.2.1.r1-04100
 # Kernel Defconfig
 DEFCONFIG=lavender_defconfig
 
+if [ "$1" = "--DynEroFs" ]; then
+TYPE=-Retro-Erofs
+echo "CONFIG_EROFS_FS" >> arch/arm64/configs/${DEFCONFIG}
+curl https://github.com/ImSpiDy/kernel_xiaomi_lavender-4.19/commit/f75ba0f935858d0d49d91460694ddbcb3cc51e7e.patch | git am
+elif [ "$1" = "--DynExt4" ]; then
+TYPE=-Retro
+elif [ "$1" = "--EroFs" ]; then
+TYPE=-EroFs
+echo "CONFIG_EROFS_FS" >> arch/arm64/configs/${DEFCONFIG}
+curl https://github.com/ImSpiDy/kernel_xiaomi_lavender-4.19/commit/b543a58ca9a48b633e84316c661e4751d2d1e307.patch | git am
+else
+TYPE=""
+curl https://github.com/ImSpiDy/kernel_xiaomi_lavender-4.19/commit/b543a58ca9a48b633e84316c661e4751d2d1e307.patch | git am
+fi
+
 # Files
 IMAGE=$(pwd)/out/arch/arm64/boot/Image.gz-dtb
 
@@ -44,11 +59,11 @@ TANGGAL=$(date +"%F%S")
 
 # Final Zip Name
 if [ "$KSU" == 0 ]; then
-FINAL_ZIP=${ZIPNAME}-${VERSION}-${DEVICE}-${TANGGAL}.zip
-LOCAL_VER=${ZIPNAME}-${VERSION}-${CLO_TAG}
+FINAL_ZIP=${ZIPNAME}-${VERSION}${TYPE}-${DEVICE}-${TANGGAL}.zip
+LOCAL_VER=${ZIPNAME}-${VERSION}${TYPE}-${CLO_TAG}
 else
-FINAL_ZIP=${ZIPNAME}-${VERSION}-KSU-${DEVICE}-${TANGGAL}.zip
-LOCAL_VER=${ZIPNAME}-${VERSION}-KSU-${CLO_TAG}
+FINAL_ZIP=${ZIPNAME}-${VERSION}-KSU${TYPE}-${DEVICE}-${TANGGAL}.zip
+LOCAL_VER=${ZIPNAME}-${VERSION}-KSU${TYPE}-${CLO_TAG}
 fi
 
 # Update Local Version
