@@ -11,6 +11,9 @@ KERNEL_DIR="$(pwd)"
 # DevUpload
 RELEASE=1
 
+# KSU
+KSU=1
+
 ##----------------------------------------------------------##
 # Device Name and Model
 MODEL=Xiaomi
@@ -19,6 +22,7 @@ DEVICE=Lavender
 # Kernel Name and Version
 ZIPNAME=S0NiX
 VERSION=v2.0-CLO
+CLO_TAG=LA.UM.11.2.1.r1-04100
 
 # Kernel Defconfig
 DEFCONFIG=lavender_defconfig
@@ -39,11 +43,39 @@ DATE=$(TZ=Asia/Kolkata date +"%Y%m%d-%T")
 TANGGAL=$(date +"%F%S")
 
 # Final Zip Name
+if [ "$KSU" == 0 ]; then
 FINAL_ZIP=${ZIPNAME}-${VERSION}-${DEVICE}-${TANGGAL}.zip
+LOCAL_VER=${ZIPNAME}-${VERSION}-${CLO_TAG}
+else
+FINAL_ZIP=${ZIPNAME}-${VERSION}-KSU-${DEVICE}-${TANGGAL}.zip
+LOCAL_VER=${ZIPNAME}-${VERSION}-KSU-${CLO_TAG}
+fi
+
+# Update Local Version
+echo "CONFIG_LOCALVERSION="-$LOCAL_VER"" >> arch/arm64/configs/${DEFCONFIG}
 
 ##----------------------------------------------------------##
 # Specify compiler - nexus, proton, azure, aosp
 COMPILER=aosp
+
+
+##----------------------------------------------------------##
+# Implement Kernel SU
+if [ "$KSU" == 1 ]; then
+# Move KSU files to Kernel Dir
+cd ..
+git clone https://github.com/tiann/KernelSU -b main ksu
+mkdir -p project/drivers/KernelSU
+cp -r ksu/kernel/* project/drivers/KernelSU
+# move KSU Version to Kernel Dir
+echo "$(cd ksu && git rev-list --count HEAD)" > ksu_version.txt
+KSUV="ccflags-y += -DKSU_VERSION=$(($(cat ksu_version.txt) + 10200))"
+echo "$KSUV" >> project/drivers/KernelSU/Makefile
+# Apply KernelSU Patches
+cd project
+git apply patch/KERNELSU.p
+echo "CONFIG_KSU=y" >> arch/arm64/configs/${DEFCONFIG}
+fi
 
 ##----------------------------------------------------------##
 # Clone ToolChain
