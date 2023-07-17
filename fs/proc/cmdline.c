@@ -14,26 +14,39 @@ static int cmdline_proc_show(struct seq_file *m, void *v)
 	return 0;
 }
 
+static void patch_flag(char *cmd, const char *flag, const char *val)
+{
+	size_t flag_len, val_len;
+	char *start, *end;
+
+	start = strstr(cmd, flag);
+	if (!start)
+		return;
+
+	flag_len = strlen(flag);
+	val_len = strlen(val);
+	end = start + flag_len + strcspn(start + flag_len, " ");
+	memmove(start + flag_len + val_len, end, strlen(end) + 1);
+	memcpy(start + flag_len, val, val_len);
+}
+
+static void patch_safetynet_flags(char *cmd)
+{
+	patch_flag(cmd, "androidboot.flash.locked=", "1");
+	patch_flag(cmd, "androidboot.verifiedbootstate=", "green");
+	patch_flag(cmd, "androidboot.veritymode=", "enforcing");
+	patch_flag(cmd, "androidboot.vbmeta.device_state=", "locked");
+}
+
 static int __init proc_cmdline_init(void)
 {
-	char *offset_addr, *cmd = new_command_line;
-	size_t search_len, replace_len;
+	strcpy(new_command_line, saved_command_line);
 
-	strcpy(cmd, saved_command_line);
-
-	char *search = "skip_initramf";
-	char *replace = "androidboot.force_normal_boot=1 ";
-	search_len = strlen(search);
-	replace_len = strlen(replace);
-
-	offset_addr = strstr(cmd, search);
-	if (offset_addr) {
-		size_t tail_len;
-		tail_len = strlen(offset_addr+search_len);
-
-		memmove(offset_addr+replace_len,offset_addr+search_len,tail_len+1);
-		memcpy(offset_addr, replace, replace_len);
-	}
+	/*
+	 * Patch various flags from command line seen by userspace in order to
+	 * pass SafetyNet checks.
+	 */
+	patch_safetynet_flags(new_command_line);
 
 	proc_create_single("cmdline", 0, NULL, cmdline_proc_show);
 	return 0;
