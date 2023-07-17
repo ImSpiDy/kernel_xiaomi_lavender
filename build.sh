@@ -33,6 +33,7 @@ echo "CONFIG_EROFS_FS" >> arch/arm64/configs/${DEFCONFIG}
 curl https://github.com/ImSpiDy/kernel_xiaomi_lavender-4.19/commit/f75ba0f935858d0d49d91460694ddbcb3cc51e7e.patch | git am
 elif [ "$1" = "--DynExt4" ]; then
 TYPE=-Retro
+MSG=1
 elif [ "$1" = "--EroFs" ]; then
 TYPE=-EroFs
 echo "CONFIG_EROFS_FS" >> arch/arm64/configs/${DEFCONFIG}
@@ -95,24 +96,23 @@ fi
 ##----------------------------------------------------------##
 # Clone ToolChain
 function cloneTC() {
+	if [ "$MSG" == "1" ]; then
+	post_msg " Cloning $COMPILER Clang ToolChain "
+	fi
 	if [ $COMPILER = "nexus" ];
 	then
-	post_msg " Cloning Nexus Clang ToolChain "
 	git clone --depth=1 https://gitlab.com/Project-Nexus/nexus-clang.git clang
 	PATH="${KERNEL_DIR}/clang/bin:$PATH"
 	elif [ $COMPILER = "proton" ];
 	then
-	post_msg " Cloning Proton Clang ToolChain "
 	git clone --depth=1 https://github.com/kdrag0n/proton-clang.git clang
 	PATH="${KERNEL_DIR}/clang/bin:$PATH"
 	elif [ $COMPILER = "azure" ];
 	then
-	post_msg " Cloning Azure Clang ToolChain "
 	git clone --depth=1 https://gitlab.com/Panchajanya1999/azure-clang.git clang
 	PATH="${KERNEL_DIR}/clang/bin:$PATH"
 	elif [ $COMPILER = "aosp" ];
 	then
-	post_msg " Cloning Aosp Clang ToolChain "
         mkdir aosp-clang
         cd aosp-clang || exit
 	wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-r498229.tar.gz
@@ -188,8 +188,10 @@ function push() {
 function compile() {
 START=$(date +"%s")
 	# Push Notification
-	post_msg "<b>$KBUILD_BUILD_VERSION CI Build Triggered</b>%0A<b>Docker OS: </b><code>$DISTRO</code>%0A<b>Kernel Version : </b><code>$KERVER</code>%0A<b>Date : </b><code>$(TZ=Asia/Kolkata date)</code>%0A<b>Device : </b><code>$MODEL [$DEVICE]</code>%0A<b>Pipeline Host : </b><code>$KBUILD_BUILD_HOST</code>%0A<b>Host Core Count : </b><code>$PROCS</code>%0A<b>Compiler Used : </b><code>$KBUILD_COMPILER_STRING</code>%0A<b>Branch : </b><code>$CI_BRANCH</code>%0A<b>Top Commit : </b><a href='$DRONE_COMMIT_LINK'>$COMMIT_HEAD</a>"
-	
+	if [ "$MSG" == "1" ]; then
+		post_msg "<b>$KBUILD_BUILD_VERSION CI Build Triggered</b>%0A<b>Docker OS: </b><code>$DISTRO</code>%0A<b>Kernel Version : </b><code>$KERVER</code>%0A<b>Date : </b><code>$(TZ=Asia/Kolkata date)</code>%0A<b>Device : </b><code>$MODEL [$DEVICE]</code>%0A<b>Pipeline Host : </b><code>$KBUILD_BUILD_HOST</code>%0A<b>Host Core Count : </b><code>$PROCS</code>%0A<b>Compiler Used : </b><code>$KBUILD_COMPILER_STRING</code>%0A<b>Branch : </b><code>$CI_BRANCH</code>%0A<b>Top Commit : </b><a href='$DRONE_COMMIT_LINK'>$COMMIT_HEAD</a>"
+	fi
+
 	# Compile
 	make O=out CC=clang ARCH=arm64 ${DEFCONFIG}
 	if [ -d ${KERNEL_DIR}/clang ];
@@ -218,7 +220,7 @@ START=$(date +"%s")
 	       push "error.log" "Build Throws Errors"
 	       exit 1
 	   else
-	       post_msg " Kernel Compilation Finished. Started Zipping "
+	       post_msg " ${TYPE} Kernel Compilation Finished. Started Zipping "
 	fi
 	}
 
