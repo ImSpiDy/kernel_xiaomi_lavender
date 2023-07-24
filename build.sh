@@ -9,7 +9,7 @@
 KERNEL_DIR="$(pwd)"
 
 # DevUpload
-RELEASE=1
+RELEASE=0
 
 # KSU
 KSU=1
