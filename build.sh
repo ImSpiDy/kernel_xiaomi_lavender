@@ -29,14 +29,14 @@ DEFCONFIG=lavender_defconfig
 
 if [ "$1" = "--DynEroFs" ]; then
 TYPE=-Retro-Erofs
-echo "CONFIG_EROFS_FS" >> arch/arm64/configs/${DEFCONFIG}
+echo "CONFIG_EROFS_FS=y" >> arch/arm64/configs/${DEFCONFIG}
 curl https://github.com/ImSpiDy/kernel_xiaomi_lavender-4.19/commit/f75ba0f935858d0d49d91460694ddbcb3cc51e7e.patch | git am
 elif [ "$1" = "--DynExt4" ]; then
 TYPE=-Retro
 MSG=1
 elif [ "$1" = "--EroFs" ]; then
 TYPE=-EroFs
-echo "CONFIG_EROFS_FS" >> arch/arm64/configs/${DEFCONFIG}
+echo "CONFIG_EROFS_FS=y" >> arch/arm64/configs/${DEFCONFIG}
 curl https://github.com/ImSpiDy/kernel_xiaomi_lavender-4.19/commit/b543a58ca9a48b633e84316c661e4751d2d1e307.patch | git am
 else
 TYPE=""
