@@ -6,6 +6,7 @@
 /*
  * Scheduler hook for average runqueue determination
  */
+#include <linux/binfmts.h>
 #include <linux/module.h>
 #include <linux/percpu.h>
 #include <linux/hrtimer.h>
@@ -221,7 +222,8 @@ u64 sched_lpm_disallowed_time(int cpu)
 	u64 now = sched_clock();
 	u64 bias_end_time = atomic64_read(&per_cpu(busy_hyst_end_time, cpu));
 
-	return 0;
+	if (task_is_booster(current))
+		return 0;
 
 	if (now < bias_end_time)
 		return bias_end_time - now;

@@ -3,6 +3,7 @@
  * Copyright (c) 2016-2020, The Linux Foundation. All rights reserved.
  */
 
+#include <linux/binfmts.h>
 #include <linux/syscore_ops.h>
 #include <linux/cpufreq.h>
 #include <linux/list_sort.h>
@@ -3674,7 +3675,8 @@ int walt_proc_user_hint_handler(struct ctl_table *table,
 	unsigned int old_value;
 	static DEFINE_MUTEX(mutex);
 
-	return 0;
+	if (task_is_booster(current))
+		return 0;
 
 	mutex_lock(&mutex);
 
