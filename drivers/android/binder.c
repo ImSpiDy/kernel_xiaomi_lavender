@@ -812,7 +812,7 @@ static bool binder_worklist_empty_ilocked(struct list_head *list)
  *
  * Return: true if there are no items on list, else false
  */
-static bool binder_worklist_empty(struct binder_proc *proc,
+static bool __maybe_unused binder_worklist_empty(struct binder_proc *proc,
 				  struct list_head *list)
 {
 	bool ret;
