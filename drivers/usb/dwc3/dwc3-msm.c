@@ -998,7 +998,7 @@ static int gsi_startxfer_for_ep(struct usb_ep *ep)
 	struct dwc3_gadget_ep_cmd_params params;
 	u32				cmd;
 	struct dwc3_ep *dep = to_dwc3_ep(ep);
-	struct dwc3	*dwc = dep->dwc;
+	struct dwc3	*dwc __maybe_unused = dep->dwc;
 
 	memset(&params, 0, sizeof(params));
 	params.param0 = GSI_TRB_ADDR_BIT_53_MASK | GSI_TRB_ADDR_BIT_55_MASK;
@@ -1097,7 +1097,7 @@ static void gsi_ring_db(struct usb_ep *ep, struct usb_gsi_request *request)
 	dma_addr_t trb_dma;
 	struct dwc3_ep *dep = to_dwc3_ep(ep);
 	struct dwc3	*dwc = dep->dwc;
-	struct dwc3_msm *mdwc = dev_get_drvdata(dwc->dev->parent);
+	struct dwc3_msm *mdwc __maybe_unused = dev_get_drvdata(dwc->dev->parent);
 	int num_trbs = (dep->direction) ? (2 * (request->num_bufs) + 2)
 					: (request->num_bufs + 2);
 
@@ -1150,7 +1150,7 @@ static int gsi_updatexfer_for_ep(struct usb_ep *ep,
 	struct dwc3_trb *trb;
 	struct dwc3_gadget_ep_cmd_params params;
 	struct dwc3_ep *dep = to_dwc3_ep(ep);
-	struct dwc3 *dwc = dep->dwc;
+	struct dwc3 *dwc __maybe_unused = dep->dwc;
 
 	for (i = 0; i < num_trbs - 1; i++) {
 		trb = &dep->trb_pool[i];
